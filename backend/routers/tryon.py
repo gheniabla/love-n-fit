@@ -22,8 +22,9 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 IMAGE_MODELS = [
-    "gemini-2.0-flash-exp-image-generation",
+    "gemini-3-pro-image-preview",
     "gemini-2.5-flash-image",
+    "gemini-2.0-flash-exp-image-generation",
 ]
 TEXT_MODEL = "gemini-2.5-flash"
 
@@ -50,8 +51,27 @@ def _convert_measurements(height_feet: int, height_inches: int, weight_lbs: int)
 
 
 def _build_image_prompt(product, instructions):
-    extra = f" {instructions}." if instructions else ""
-    return f"Using the person in the first photo as reference, generate a photo of that same exact person wearing the {product.name} shown in the second photo. Keep the person's face, hair, skin tone, and body identical to the first photo — only change their outfit.{extra}"
+    extra = f"\nAdditional notes: {instructions}." if instructions else ""
+    return (
+        f"IMAGE 1 is the IDENTITY REFERENCE photo of a real person who uploaded their image with full consent. "
+        f"IMAGE 2 is the CLOTHING REFERENCE showing the {product.name}.\n\n"
+        f"Generate a single photorealistic image of the EXACT same person from IMAGE 1 "
+        f"wearing the {product.name} from IMAGE 2.\n\n"
+        f"CRITICAL IDENTITY REQUIREMENTS — preserve with absolute fidelity:\n"
+        f"- Facial structure, bone structure, and face shape\n"
+        f"- Eye color, eye shape, and eye spacing\n"
+        f"- Nose shape and size\n"
+        f"- Mouth shape and lip proportions\n"
+        f"- Skin tone and complexion\n"
+        f"- Hair color, texture, length, and style\n"
+        f"- Body proportions and build\n"
+        f"- Any distinctive features (freckles, moles, scars, dimples)\n\n"
+        f"CHANGE ONLY the clothing: realistically drape and fit the {product.name} "
+        f"onto the person, matching the lighting and shadows of the original photo.\n"
+        f"Do not morph, blend, or alter any facial features. "
+        f"The generated face must be indistinguishable from IMAGE 1."
+        f"{extra}"
+    )
 
 
 def _build_text_prompt(product, height_feet, height_inches, weight_lbs, instructions):
@@ -141,7 +161,32 @@ async def try_on(
         ]
 
         config = types.GenerateContentConfig(
-            response_modalities=["TEXT", "IMAGE"]
+            system_instruction=(
+                "You are a virtual try-on assistant. Your absolute top priority "
+                "is preserving the exact facial identity, facial structure, skin tone, "
+                "hair, and body proportions of the person in the reference photo. "
+                "Only change their clothing. Never morph, blend, or alter facial features. "
+                "The person's face is a sacred, immutable element."
+            ),
+            response_modalities=["TEXT", "IMAGE"],
+            safety_settings=[
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                ),
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                ),
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                ),
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                ),
+            ],
         )
 
         # Try each image model, fallback on quota/error

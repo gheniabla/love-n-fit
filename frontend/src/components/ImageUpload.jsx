@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Upload, Typography, message } from "antd";
-import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { UserOutlined, CloseCircleOutlined, CameraOutlined } from "@ant-design/icons";
 
-const { Title } = Typography;
 const { Dragger } = Upload;
 
-const ImageUpload = ({ label, onImageChange, isDarkMode = false }) => {
+const ImageUpload = ({ onImageChange, isDarkMode = false }) => {
   const [preview, setPreview] = useState(null);
 
   const uploadProps = {
@@ -35,9 +34,6 @@ const ImageUpload = ({ label, onImageChange, isDarkMode = false }) => {
       reader.readAsDataURL(file);
       return false;
     },
-    onDrop: (e) => {
-      console.log("Dropped files", e.dataTransfer.files);
-    },
   };
 
   const handleRemove = () => {
@@ -45,61 +41,80 @@ const ImageUpload = ({ label, onImageChange, isDarkMode = false }) => {
     onImageChange(null);
   };
 
-  return (
-    <div className="w-full transition-all duration-300 flex flex-col items-center">
-      {preview ? (
-        <div className="relative w-full flex justify-center items-center">
-          <div className="relative">
-            <img
-              src={preview}
-              alt="Preview"
-              className="object-contain rounded-lg shadow-md"
-              style={{ display: "block", maxHeight: 220, maxWidth: "100%" }}
-            />
+  const accent = isDarkMode ? "#4A90A4" : "#2D3C4C";
 
-            <CloseCircleOutlined
-              onClick={handleRemove}
-              style={{
-                position: "absolute",
-                top: -10,
-                right: -10,
-                fontSize: 20,
-                color: isDarkMode ? "#f87171" : "#ef4444", // red-400 or red-500
-                backgroundColor: isDarkMode ? "#1f1f1f" : "#ffffff",
-                borderRadius: "50%",
-                cursor: "pointer",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                zIndex: 10,
-              }}
-            />
-          </div>
+  return (
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      {preview ? (
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <img
+            src={preview}
+            alt="Preview"
+            style={{
+              display: "block",
+              maxHeight: 200,
+              maxWidth: "100%",
+              borderRadius: 12,
+              objectFit: "contain",
+              boxShadow: isDarkMode
+                ? "0 4px 16px rgba(0,0,0,0.4)"
+                : "0 4px 16px rgba(0,0,0,0.08)",
+            }}
+          />
+          <CloseCircleOutlined
+            onClick={handleRemove}
+            style={{
+              position: "absolute",
+              top: -8,
+              right: -8,
+              fontSize: 22,
+              color: isDarkMode ? "#f87171" : "#ef4444",
+              backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+              borderRadius: "50%",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              zIndex: 10,
+            }}
+          />
         </div>
       ) : (
         <Dragger
           {...uploadProps}
-          className="w-full max-w-xs p-4"
           style={{
-            border: `1px dashed ${isDarkMode ? "#444" : "#d9d9d9"}`,
-            borderRadius: 12,
-            backgroundColor: isDarkMode ? "#1f1f1f" : "#fafafa",
+            width: "100%",
+            border: `2px dashed ${isDarkMode ? "#333" : "#d4d4d4"}`,
+            borderRadius: 14,
+            backgroundColor: isDarkMode ? "#151515" : "#fafaf9",
+            padding: "20px 16px",
+            transition: "border-color 0.2s ease",
           }}
+          className="upload-dragger"
         >
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined
-              style={{ color: isDarkMode ? "#38bdf8" : "#1677ff" }}
-            />
-          </p>
-          <p
-            className="ant-upload-text"
-            style={{ color: isDarkMode ? "#e5e5e5" : "#333" }}
+          {/* Person silhouette icon */}
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: "50%",
+              backgroundColor: isDarkMode ? "#1e2a30" : "#e8eff2",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 12px auto",
+            }}
           >
-            Click or drag an image here to upload
-          </p>
-          <p
-            className="ant-upload-hint"
-            style={{ fontSize: 12, color: isDarkMode ? "#a1a1aa" : "#666" }}
-          >
-            Image only • Max size: 10MB
+            <UserOutlined style={{ fontSize: 32, color: accent }} />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 4 }}>
+            <CameraOutlined style={{ fontSize: 14, color: accent }} />
+            <span style={{ color: isDarkMode ? "#d4d4d4" : "#2D3C4C", fontSize: 14, fontWeight: 500 }}>
+              Upload your photo
+            </span>
+          </div>
+
+          <p style={{ fontSize: 12, color: isDarkMode ? "#666" : "#999", margin: 0 }}>
+            Click or drag to upload  ·  Max 10MB
           </p>
         </Dragger>
       )}

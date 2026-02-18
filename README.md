@@ -2,6 +2,23 @@
 
 AI-powered virtual try-on app that lets you upload a photo, find Vuori clothing products via a RAG chatbot, and see how they look on you — with personalized size recommendations.
 
+## Screenshots
+
+### Upload & Chat
+Upload your photo, chat with the AI shopping assistant to find the perfect product, and enter your measurements.
+
+![Upload and Chat](screenshots/image1.png)
+
+### Try-On Result
+See yourself wearing the product with AI-generated imagery, along with product details, available sizes, and a personalized size recommendation.
+
+![Try-On Result](screenshots/image2.png)
+
+### Try-On History
+Browse all your previous try-on results in a visual grid.
+
+![Try-On History](screenshots/image3.png)
+
 ## Features
 
 - Upload a person photo + enter height/weight measurements

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Input, Button, Typography, Tag } from "antd";
-import { SendOutlined, ShoppingOutlined, HeartOutlined } from "@ant-design/icons";
+import { SendOutlined, HeartOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const { Text } = Typography;
@@ -11,7 +11,7 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
     {
       role: "assistant",
       content:
-        "Hi! I'm your Vuori shopping assistant. Tell me what you're looking for — an activity, style, or occasion — and I'll find the perfect pieces for you.",
+        "Hi! Tell me what you're looking for — an activity, style, or occasion — and I'll find the perfect Vuori pieces for you.",
       products: [],
     },
   ]);
@@ -19,12 +19,14 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const chatBg = isDarkMode ? "#141414" : "#f7f7f8";
-  const userBubble = isDarkMode ? "#1d4ed8" : "#0ea5e9";
-  const assistantBubble = isDarkMode ? "#2a2a2a" : "#e8eaed";
-  const textColor = isDarkMode ? "#e4e4e4" : "#111827";
-  const subText = isDarkMode ? "#9ca3af" : "#6b7280";
-  const borderColor = isDarkMode ? "#2d2d2d" : "#e5e7eb";
+  // Vuori-inspired palette
+  const chatBg = isDarkMode ? "#111" : "#f8f8f6";
+  const userBubble = isDarkMode ? "#2D5A6E" : "#2D3C4C";
+  const assistantBubble = isDarkMode ? "#222" : "#EDEDED";
+  const textColor = isDarkMode ? "#e0e0e0" : "#2D3C4C";
+  const subText = isDarkMode ? "#888" : "#727272";
+  const borderColor = isDarkMode ? "#282828" : "#E8E8E8";
+  const headerBg = isDarkMode ? "#161616" : "#f2f2f0";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,17 +51,18 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
         history: history.slice(0, -1),
       });
 
-      const assistantMsg = {
-        role: "assistant",
-        content: response.data.reply,
-        products: response.data.products || [],
-        suggestedUrl: response.data.suggested_product_url,
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: response.data.reply,
+          products: response.data.products || [],
+          suggestedUrl: response.data.suggested_product_url,
+        },
+      ]);
     } catch (error) {
       const errMsg =
-        error.response?.data?.detail || "Sorry, I had trouble responding. Please try again.";
+        error.response?.data?.detail || "Sorry, something went wrong. Please try again.";
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: errMsg, products: [] },
@@ -85,36 +88,26 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
         flexDirection: "column",
         height: "100%",
         border: `1px solid ${borderColor}`,
+        background: chatBg,
       }}
     >
       {/* Header */}
       <div
         style={{
-          padding: "10px 16px",
+          padding: "9px 14px",
           borderBottom: `1px solid ${borderColor}`,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          background: isDarkMode ? "#1a1a1a" : "#fafafa",
+          background: headerBg,
         }}
       >
-        <ShoppingOutlined style={{ color: "#0ea5e9", fontSize: 16 }} />
-        <Text strong style={{ color: textColor, fontSize: 13 }}>
+        <Text strong style={{ color: textColor, fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           Shopping Assistant
         </Text>
       </div>
 
-      {/* Messages */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: 12,
-          background: chatBg,
-        }}
-      >
+      {/* Messages — scrollable area */}
+      <div style={{ flex: 1, overflowY: "auto", padding: 10, minHeight: 0 }}>
         {messages.map((msg, i) => (
-          <div key={i} style={{ marginBottom: 10 }}>
+          <div key={i} style={{ marginBottom: 8 }}>
             <div
               style={{
                 display: "flex",
@@ -124,12 +117,15 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
               <div
                 style={{
                   background: msg.role === "user" ? userBubble : assistantBubble,
-                  color: msg.role === "user" ? "#ffffff" : textColor,
-                  padding: "8px 12px",
-                  borderRadius: msg.role === "user" ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
-                  maxWidth: "85%",
+                  color: msg.role === "user" ? "#fff" : textColor,
+                  padding: "7px 12px",
+                  borderRadius:
+                    msg.role === "user"
+                      ? "12px 12px 3px 12px"
+                      : "12px 12px 12px 3px",
+                  maxWidth: "88%",
                   fontSize: 12.5,
-                  lineHeight: 1.5,
+                  lineHeight: 1.55,
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
                 }}
@@ -139,56 +135,53 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
             </div>
 
             {/* Product cards */}
-            {msg.products && msg.products.length > 0 && (
-              <div style={{ marginTop: 6, paddingLeft: 2 }}>
+            {msg.products?.length > 0 && (
+              <div style={{ marginTop: 5 }}>
                 {msg.products.map((product, j) => (
                   <div
                     key={j}
                     style={{
-                      background: isDarkMode ? "#1f1f1f" : "#ffffff",
+                      background: isDarkMode ? "#1a1a1a" : "#fff",
                       border: `1px solid ${borderColor}`,
                       borderRadius: 10,
-                      padding: "8px 12px",
-                      marginBottom: 5,
+                      padding: "8px 10px",
+                      marginBottom: 4,
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <Text
-                          strong
-                          style={{
-                            color: textColor,
-                            fontSize: 12.5,
-                            display: "block",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {product.name}
-                        </Text>
-                        <div style={{ display: "flex", gap: 4, marginTop: 3, flexWrap: "wrap" }}>
-                          {product.price > 0 && (
-                            <Tag color="green" style={{ margin: 0, fontSize: 10, lineHeight: "18px" }}>
-                              ${product.price.toFixed(2)}
-                            </Tag>
-                          )}
-                          {product.category && (
-                            <Tag style={{ margin: 0, fontSize: 10, lineHeight: "18px" }}>{product.category}</Tag>
-                          )}
-                        </div>
-                      </div>
+                    <Text
+                      strong
+                      style={{
+                        color: textColor,
+                        fontSize: 12,
+                        display: "block",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {product.name}
+                    </Text>
+                    <div style={{ display: "flex", gap: 4, marginTop: 2, flexWrap: "wrap" }}>
+                      {product.price > 0 && (
+                        <Tag style={{ margin: 0, fontSize: 10, lineHeight: "17px", color: isDarkMode ? "#8fb" : "#2d6a4f", borderColor: isDarkMode ? "#264d36" : "#b7e4c7", background: isDarkMode ? "#162920" : "#f0faf4" }}>
+                          ${product.price.toFixed(2)}
+                        </Tag>
+                      )}
+                      {product.category && (
+                        <Tag style={{ margin: 0, fontSize: 10, lineHeight: "17px" }}>{product.category}</Tag>
+                      )}
                     </div>
-                    <div style={{ display: "flex", gap: 6, marginTop: 6, justifyContent: "flex-end" }}>
+                    <div style={{ display: "flex", gap: 5, marginTop: 6, justifyContent: "flex-end" }}>
                       <Button
                         size="small"
                         onClick={() => window.open(product.url, "_blank")}
                         icon={<HeartOutlined />}
                         style={{
-                          fontSize: 11,
+                          fontSize: 10.5,
                           borderRadius: 6,
-                          color: "#e11d48",
-                          borderColor: "#e11d48",
+                          color: "#c0392b",
+                          borderColor: "#e8c4c0",
+                          height: 26,
                         }}
                       >
                         Love it!
@@ -197,7 +190,13 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
                         size="small"
                         type="primary"
                         onClick={() => onProductSelect(product.url)}
-                        style={{ fontSize: 11, borderRadius: 6 }}
+                        style={{
+                          fontSize: 10.5,
+                          borderRadius: 6,
+                          height: 26,
+                          background: isDarkMode ? "#2D5A6E" : "#2D3C4C",
+                          borderColor: isDarkMode ? "#2D5A6E" : "#2D3C4C",
+                        }}
                       >
                         Try it on
                       </Button>
@@ -210,13 +209,13 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
         ))}
 
         {loading && (
-          <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 8 }}>
             <div
               style={{
                 background: assistantBubble,
                 color: subText,
-                padding: "8px 12px",
-                borderRadius: "14px 14px 14px 4px",
+                padding: "7px 12px",
+                borderRadius: "12px 12px 12px 3px",
                 fontSize: 12.5,
               }}
             >
@@ -228,15 +227,15 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input — 2-line textarea */}
+      {/* Input */}
       <div
         style={{
-          padding: "8px 10px",
+          padding: "7px 10px",
           borderTop: `1px solid ${borderColor}`,
           display: "flex",
-          gap: 8,
+          gap: 6,
           alignItems: "flex-end",
-          background: isDarkMode ? "#1a1a1a" : "#fafafa",
+          background: headerBg,
         }}
       >
         <TextArea
@@ -248,10 +247,11 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
           autoSize={{ minRows: 2, maxRows: 3 }}
           style={{
             borderRadius: 8,
-            fontSize: 13,
-            backgroundColor: isDarkMode ? "#1f1f1f" : "#ffffff",
+            fontSize: 12.5,
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
             color: textColor,
             resize: "none",
+            borderColor: borderColor,
           }}
         />
         <Button
@@ -259,7 +259,15 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
           icon={<SendOutlined />}
           onClick={sendMessage}
           loading={loading}
-          style={{ borderRadius: 8, height: 36, width: 36, minWidth: 36, padding: 0 }}
+          style={{
+            borderRadius: 8,
+            height: 34,
+            width: 34,
+            minWidth: 34,
+            padding: 0,
+            background: isDarkMode ? "#2D5A6E" : "#2D3C4C",
+            borderColor: isDarkMode ? "#2D5A6E" : "#2D3C4C",
+          }}
         />
       </div>
     </div>

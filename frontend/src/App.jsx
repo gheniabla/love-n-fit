@@ -97,9 +97,7 @@ function App() {
       const response = await axios.post(
         "http://localhost:8000/api/try-on",
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       const newResult = {
@@ -123,75 +121,85 @@ function App() {
     }
   };
 
-  const bgColor = isDarkMode ? "#0a0a0a" : "#f4f5f7";
-  const cardColor = isDarkMode ? "#161616" : "#ffffff";
-  const textColor = isDarkMode ? "#e4e4e4" : "#111827";
-  const subText = isDarkMode ? "#9ca3af" : "#6b7280";
-  const borderColor = isDarkMode ? "#222" : "#e5e7eb";
+  // Vuori-inspired palette
+  const bgColor = isDarkMode ? "#0c0c0c" : "#FAFAF8";
+  const cardColor = isDarkMode ? "#151515" : "#FFFFFF";
+  const textColor = isDarkMode ? "#e0e0e0" : "#2D3C4C";
+  const subText = isDarkMode ? "#888" : "#727272";
+  const borderColor = isDarkMode ? "#222" : "#E8E8E8";
+  const accent = isDarkMode ? "#4A90A4" : "#2D3C4C";
   const cardShadow = isDarkMode
-    ? "0 1px 3px rgba(0,0,0,0.4)"
-    : "0 1px 4px rgba(0,0,0,0.06)";
+    ? "none"
+    : "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)";
 
   return (
     <ConfigProvider
       theme={{
         algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
         token: {
-          colorPrimary: "#0ea5e9",
-          borderRadius: 10,
+          colorPrimary: accent,
+          borderRadius: 8,
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         },
       }}
     >
       <Layout style={{ minHeight: "100vh", background: bgColor }}>
+        {/* Header */}
         <Header
           style={{
-            background: "transparent",
+            background: isDarkMode ? "#111" : "#FFFFFF",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "1.25rem 2rem",
-            height: "auto",
-            lineHeight: "normal",
+            padding: "0 2rem",
+            height: 56,
+            lineHeight: "56px",
+            borderBottom: `1px solid ${borderColor}`,
           }}
         >
-          <Title level={3} style={{ margin: 0, color: textColor, letterSpacing: "-0.02em" }}>
+          <span
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: textColor,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+            }}
+          >
             Love N Fit
-          </Title>
+          </span>
           <Switch
             checked={isDarkMode}
             onChange={setIsDarkMode}
             checkedChildren={<BulbFilled />}
             unCheckedChildren={<BulbOutlined />}
+            style={{ backgroundColor: isDarkMode ? "#4A90A4" : undefined }}
           />
         </Header>
 
-        <Content style={{ padding: "1rem 1rem 2rem" }}>
-          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-            <Title
-              level={2}
-              style={{
-                color: textColor,
-                marginBottom: 4,
-                textAlign: "center",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Virtual Try-On
-            </Title>
-            <Text
-              style={{
-                display: "block",
-                textAlign: "center",
-                color: subText,
-                marginBottom: 32,
-                fontSize: 15,
-              }}
-            >
-              Upload your photo, find a Vuori product, and see how it looks on you
-            </Text>
+        <Content style={{ padding: "2rem 1.5rem" }}>
+          <div style={{ maxWidth: 1040, margin: "0 auto" }}>
+            {/* Hero */}
+            <div style={{ textAlign: "center", marginBottom: 36 }}>
+              <h1
+                style={{
+                  color: textColor,
+                  fontSize: 28,
+                  fontWeight: 700,
+                  margin: "0 0 6px 0",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Virtual Try-On
+              </h1>
+              <p style={{ color: subText, fontSize: 15, margin: 0 }}>
+                Upload your photo, find a Vuori product, and see how it looks on you
+              </p>
+            </div>
 
             <form onSubmit={handleSubmit}>
-              {/* Equal-height two-column layout */}
+              {/* Two-column layout */}
               <div
                 style={{
                   display: "flex",
@@ -200,19 +208,12 @@ function App() {
                   flexWrap: "wrap",
                 }}
               >
-                {/* Left Column: Person Image + Measurements */}
-                <div
-                  style={{
-                    flex: "1 1 0",
-                    minWidth: 320,
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
+                {/* Left Column */}
+                <div style={{ flex: "1 1 0", minWidth: 340, display: "flex", flexDirection: "column" }}>
                   <div
                     style={{
                       background: cardColor,
-                      padding: 24,
+                      padding: "20px 22px",
                       borderRadius: 14,
                       border: `1px solid ${borderColor}`,
                       boxShadow: cardShadow,
@@ -221,26 +222,52 @@ function App() {
                       flexDirection: "column",
                     }}
                   >
-                    <Title
-                      level={5}
-                      style={{ color: textColor, marginBottom: 16, marginTop: 0 }}
+                    <h3
+                      style={{
+                        color: textColor,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
+                        margin: "0 0 16px 0",
+                      }}
                     >
-                      Your Photo & Measurements
-                    </Title>
+                      Your Photo
+                    </h3>
 
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <ImageUpload
                         onImageChange={setPersonImage}
                         isDarkMode={isDarkMode}
                       />
                     </div>
 
-                    <div style={{ marginTop: 20 }}>
-                      <div style={{ marginBottom: 14 }}>
-                        <Text style={{ color: subText, fontSize: 13 }}>Height</Text>
-                        <div
-                          style={{ display: "flex", gap: 8, marginTop: 4 }}
-                        >
+                    {/* Measurements */}
+                    <div
+                      style={{
+                        marginTop: 20,
+                        paddingTop: 16,
+                        borderTop: `1px solid ${borderColor}`,
+                      }}
+                    >
+                      <h3
+                        style={{
+                          color: textColor,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                          margin: "0 0 12px 0",
+                        }}
+                      >
+                        Measurements
+                      </h3>
+
+                      <div style={{ marginBottom: 12 }}>
+                        <Text style={{ color: subText, fontSize: 12.5, display: "block", marginBottom: 4 }}>
+                          Height
+                        </Text>
+                        <div style={{ display: "flex", gap: 8 }}>
                           <Select
                             placeholder="Feet"
                             style={{ flex: 1 }}
@@ -248,9 +275,7 @@ function App() {
                             onChange={setHeightFeet}
                           >
                             {[3, 4, 5, 6, 7].map((ft) => (
-                              <Option key={ft} value={ft}>
-                                {ft} ft
-                              </Option>
+                              <Option key={ft} value={ft}>{ft} ft</Option>
                             ))}
                           </Select>
                           <Select
@@ -259,22 +284,20 @@ function App() {
                             value={heightInches}
                             onChange={setHeightInches}
                           >
-                            {Array.from({ length: 12 }, (_, i) => i).map(
-                              (inch) => (
-                                <Option key={inch} value={inch}>
-                                  {inch} in
-                                </Option>
-                              )
-                            )}
+                            {Array.from({ length: 12 }, (_, i) => i).map((inch) => (
+                              <Option key={inch} value={inch}>{inch} in</Option>
+                            ))}
                           </Select>
                         </div>
                       </div>
 
                       <div>
-                        <Text style={{ color: subText, fontSize: 13 }}>Weight (lbs)</Text>
+                        <Text style={{ color: subText, fontSize: 12.5, display: "block", marginBottom: 4 }}>
+                          Weight (lbs)
+                        </Text>
                         <InputNumber
                           placeholder="e.g. 165"
-                          style={{ width: "100%", marginTop: 4 }}
+                          style={{ width: "100%" }}
                           min={50}
                           max={500}
                           value={weightLbs}
@@ -285,19 +308,12 @@ function App() {
                   </div>
                 </div>
 
-                {/* Right Column: Chat + Product URL */}
-                <div
-                  style={{
-                    flex: "1 1 0",
-                    minWidth: 320,
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
+                {/* Right Column */}
+                <div style={{ flex: "1 1 0", minWidth: 340, display: "flex", flexDirection: "column" }}>
                   <div
                     style={{
                       background: cardColor,
-                      padding: 24,
+                      padding: "20px 22px",
                       borderRadius: 14,
                       border: `1px solid ${borderColor}`,
                       boxShadow: cardShadow,
@@ -306,15 +322,21 @@ function App() {
                       flexDirection: "column",
                     }}
                   >
-                    <Title
-                      level={5}
-                      style={{ color: textColor, marginBottom: 16, marginTop: 0 }}
+                    <h3
+                      style={{
+                        color: textColor,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
+                        margin: "0 0 16px 0",
+                      }}
                     >
                       Find a Product
-                    </Title>
+                    </h3>
 
-                    {/* Chat Widget */}
-                    <div style={{ flex: 1, minHeight: 300 }}>
+                    {/* Chat Widget — fixed max height with internal scroll */}
+                    <div style={{ flex: 1, minHeight: 280, maxHeight: 400, overflow: "hidden" }}>
                       <ChatWidget
                         onProductSelect={(url) => setProductUrl(url)}
                         isDarkMode={isDarkMode}
@@ -322,23 +344,24 @@ function App() {
                     </div>
 
                     {/* Product URL */}
-                    <div style={{ marginTop: 16 }}>
-                      <Text style={{ color: subText, fontSize: 13 }}>Product URL</Text>
+                    <div
+                      style={{
+                        marginTop: 16,
+                        paddingTop: 14,
+                        borderTop: `1px solid ${borderColor}`,
+                      }}
+                    >
+                      <Text style={{ color: subText, fontSize: 12.5, display: "block", marginBottom: 4 }}>
+                        Product URL
+                      </Text>
                       <Input
                         placeholder="https://vuoriclothing.com/products/..."
-                        style={{ marginTop: 4 }}
                         value={productUrl}
                         onChange={(e) => setProductUrl(e.target.value)}
                         size="large"
+                        style={{ borderColor }}
                       />
-                      <Text
-                        style={{
-                          color: subText,
-                          fontSize: 11,
-                          marginTop: 6,
-                          display: "block",
-                        }}
-                      >
+                      <Text style={{ color: subText, fontSize: 11, marginTop: 5, display: "block" }}>
                         Paste a link or pick a product from the chat above
                       </Text>
                     </div>
@@ -347,13 +370,7 @@ function App() {
               </div>
 
               {/* Submit Button */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginTop: 32,
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
                 <Button
                   type="primary"
                   size="large"
@@ -361,50 +378,54 @@ function App() {
                   loading={loading}
                   style={{
                     height: 48,
-                    width: 240,
-                    fontSize: 16,
+                    width: 220,
+                    fontSize: 15,
                     fontWeight: 600,
                     borderRadius: 10,
+                    letterSpacing: "0.02em",
+                    background: accent,
+                    borderColor: accent,
                   }}
                 >
-                  {loading ? "Generating..." : "Try On"}
+                  {loading ? "Generating..." : "Let me Try On"}
                 </Button>
               </div>
             </form>
 
-            {/* Result Section */}
+            {/* ── Result Section ── */}
             {result && (
-              <div ref={resultRef} style={{ marginTop: 64 }}>
-                <Divider />
-                <Title
-                  level={3}
+              <div ref={resultRef} style={{ marginTop: 56 }}>
+                <Divider style={{ borderColor }} />
+                <h2
                   style={{
                     color: textColor,
                     textAlign: "center",
-                    marginBottom: 28,
-                    letterSpacing: "-0.02em",
+                    fontSize: 22,
+                    fontWeight: 700,
+                    marginBottom: 24,
+                    letterSpacing: "-0.01em",
                   }}
                 >
                   Your Try-On Result
-                </Title>
+                </h2>
 
-                {/* Recommended Size Badge */}
+                {/* Recommended Size */}
                 {result.recommendedSize && (
                   <div style={{ textAlign: "center", marginBottom: 20 }}>
-                    <div
+                    <span
                       style={{
                         display: "inline-block",
-                        background: "linear-gradient(135deg, #0ea5e9, #2563eb)",
-                        color: "#ffffff",
+                        background: accent,
+                        color: "#fff",
                         padding: "10px 28px",
-                        borderRadius: 10,
-                        fontSize: 18,
+                        borderRadius: 8,
+                        fontSize: 17,
                         fontWeight: 700,
-                        letterSpacing: "0.01em",
+                        letterSpacing: "0.02em",
                       }}
                     >
                       Recommended Size: {result.recommendedSize}
-                    </div>
+                    </span>
                   </div>
                 )}
 
@@ -413,25 +434,21 @@ function App() {
                   <div
                     style={{
                       background: cardColor,
-                      padding: 20,
+                      padding: "18px 24px",
                       borderRadius: 14,
                       border: `1px solid ${borderColor}`,
                       boxShadow: cardShadow,
-                      maxWidth: 440,
+                      maxWidth: 420,
                       margin: "0 auto 24px auto",
                       textAlign: "center",
                     }}
                   >
-                    <Text
-                      strong
-                      style={{ color: textColor, fontSize: 17 }}
-                    >
+                    <Text strong style={{ color: textColor, fontSize: 16 }}>
                       {result.productInfo.name}
                     </Text>
                     <br />
-                    <Text style={{ color: subText, fontSize: 15 }}>
-                      {result.productInfo.brand} &middot;{" "}
-                      {result.productInfo.price}
+                    <Text style={{ color: subText, fontSize: 14 }}>
+                      {result.productInfo.brand} &middot; {result.productInfo.price}
                     </Text>
                     {result.productInfo.material && (
                       <>
@@ -462,7 +479,7 @@ function App() {
                       </div>
                     )}
 
-                    {/* Love it! button — opens product page */}
+                    {/* Love it! */}
                     {result.productInfo.url && (
                       <div style={{ marginTop: 16 }}>
                         <Button
@@ -471,14 +488,14 @@ function App() {
                           icon={<HeartFilled />}
                           onClick={() => window.open(result.productInfo.url, "_blank")}
                           style={{
-                            background: "linear-gradient(135deg, #e11d48, #f43f5e)",
-                            borderColor: "#e11d48",
+                            background: "#c0392b",
+                            borderColor: "#c0392b",
                             fontWeight: 600,
-                            borderRadius: 10,
-                            height: 44,
+                            borderRadius: 8,
+                            height: 42,
                             paddingLeft: 24,
                             paddingRight: 24,
-                            fontSize: 15,
+                            fontSize: 14,
                           }}
                         >
                           Love it! Buy now
@@ -495,61 +512,62 @@ function App() {
                       src={result.resultImage}
                       alt="Try-On Result"
                       style={{
-                        borderRadius: 16,
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+                        borderRadius: 14,
+                        boxShadow: isDarkMode
+                          ? "0 8px 24px rgba(0,0,0,0.5)"
+                          : "0 8px 28px rgba(0,0,0,0.1)",
                         maxHeight: 480,
                       }}
                     />
                   </div>
                 ) : (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: 40,
-                      color: subText,
-                    }}
-                  >
+                  <div style={{ textAlign: "center", padding: 40, color: subText }}>
                     Image generation was not available for this request.
                   </div>
                 )}
 
-                {/* Styling Description */}
+                {/* Description */}
                 {result.text && (
-                  <Text
+                  <p
                     style={{
-                      display: "block",
                       textAlign: "center",
                       marginTop: 20,
                       color: textColor,
-                      fontSize: "1rem",
+                      fontSize: 14.5,
                       lineHeight: 1.7,
-                      maxWidth: 640,
+                      maxWidth: 600,
                       marginLeft: "auto",
                       marginRight: "auto",
                       whiteSpace: "pre-wrap",
                     }}
                   >
                     {result.text}
-                  </Text>
+                  </p>
                 )}
               </div>
             )}
 
-            {/* History Section */}
+            {/* ── History ── */}
             {history.length > 0 && (
-              <div style={{ marginTop: 64 }}>
-                <Divider />
-                <Title
-                  level={4}
-                  style={{ color: textColor, marginBottom: 24 }}
+              <div style={{ marginTop: 56 }}>
+                <Divider style={{ borderColor }} />
+                <h3
+                  style={{
+                    color: textColor,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    marginBottom: 20,
+                  }}
                 >
                   Previous Results
-                </Title>
+                </h3>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                    gap: 16,
+                    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                    gap: 14,
                   }}
                 >
                   {history.map((item) => (
@@ -557,7 +575,7 @@ function App() {
                       key={item.id}
                       style={{
                         background: cardColor,
-                        padding: 14,
+                        padding: 12,
                         borderRadius: 12,
                         border: `1px solid ${borderColor}`,
                         boxShadow: cardShadow,
@@ -567,24 +585,20 @@ function App() {
                         <img
                           src={item.resultImage}
                           alt="Previous"
-                          style={{
-                            width: "100%",
-                            borderRadius: 8,
-                            marginBottom: 10,
-                          }}
+                          style={{ width: "100%", borderRadius: 8, marginBottom: 8 }}
                         />
                       ) : (
                         <div
                           style={{
-                            height: 140,
+                            height: 130,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             color: subText,
-                            marginBottom: 10,
-                            background: isDarkMode ? "#111" : "#f9f9f9",
+                            marginBottom: 8,
+                            background: isDarkMode ? "#111" : "#f8f8f6",
                             borderRadius: 8,
-                            fontSize: 13,
+                            fontSize: 12,
                           }}
                         >
                           No image
@@ -596,8 +610,8 @@ function App() {
                           style={{
                             display: "block",
                             color: textColor,
-                            fontSize: 13,
-                            marginBottom: 4,
+                            fontSize: 12.5,
+                            marginBottom: 3,
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -608,16 +622,11 @@ function App() {
                       )}
                       <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
                         {item.recommendedSize && (
-                          <Tag color="blue" style={{ margin: 0 }}>
-                            Size: {item.recommendedSize}
+                          <Tag color="blue" style={{ margin: 0, fontSize: 10.5 }}>
+                            {item.recommendedSize}
                           </Tag>
                         )}
-                        <Text
-                          style={{
-                            color: subText,
-                            fontSize: 11,
-                          }}
-                        >
+                        <Text style={{ color: subText, fontSize: 10.5 }}>
                           {item.timestamp}
                         </Text>
                       </div>
