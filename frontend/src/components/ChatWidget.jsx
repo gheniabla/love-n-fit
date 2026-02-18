@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Input, Button, Typography, Tag } from "antd";
 import { SendOutlined, HeartOutlined } from "@ant-design/icons";
-import axios from "axios";
 
 const { Text } = Typography;
 const { TextArea } = Input;
 
-function ChatWidget({ onProductSelect, isDarkMode }) {
+function ChatWidget({ onProductSelect, isDarkMode, api }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -46,7 +45,7 @@ function ChatWidget({ onProductSelect, isDarkMode }) {
         .filter((m) => m.role === "user" || m.role === "assistant")
         .map((m) => ({ role: m.role, content: m.content }));
 
-      const response = await axios.post("http://localhost:8000/api/chat", {
+      const response = await api.post("/api/chat", {
         message: text,
         history: history.slice(0, -1),
       });

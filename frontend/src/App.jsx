@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -19,6 +19,7 @@ import {
   BulbOutlined,
   BulbFilled,
   HeartFilled,
+  LockOutlined,
 } from "@ant-design/icons";
 
 import ImageUpload from "./components/ImageUpload";
@@ -29,7 +30,13 @@ const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 const { Option } = Select;
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 function App() {
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem("authToken"));
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const [personImage, setPersonImage] = useState(null);
   const [productUrl, setProductUrl] = useState("");
   const [heightFeet, setHeightFeet] = useState(null);
@@ -46,6 +53,30 @@ function App() {
   const resultRef = useRef(null);
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
+  // Shared axios instance with auth header
+  const api = useMemo(() => {
+    const instance = axios.create({ baseURL: API_URL });
+    instance.interceptors.request.use((config) => {
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+    instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem("authToken");
+          setAuthToken(null);
+          toast.error("Session expired. Please log in again.");
+        }
+        return Promise.reject(error);
+      }
+    );
+    return instance;
+  }, []);
+
   useEffect(() => {
     localStorage.setItem("darkMode", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
@@ -55,6 +86,34 @@ function App() {
       resultRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [result]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!loginPassword.trim()) return;
+    setLoginLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/login`, {
+        password: loginPassword,
+      });
+      const token = response.data.token;
+      localStorage.setItem("authToken", token);
+      setAuthToken(token);
+      setLoginPassword("");
+    } catch (error) {
+      toast.error(
+        error.response?.status === 401
+          ? "Invalid password"
+          : "Login failed. Is the server running?"
+      );
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    setAuthToken(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,11 +153,9 @@ function App() {
     formData.append("instructions", "");
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/try-on",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const response = await api.post("/api/try-on", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       const newResult = {
         id: Date.now(),
@@ -113,9 +170,11 @@ function App() {
       setHistory((prev) => [newResult, ...prev]);
       toast.success("Virtual try-on completed!");
     } catch (error) {
-      toast.error(
-        error.response?.data?.detail || "An error occurred during processing"
-      );
+      if (error.response?.status !== 401) {
+        toast.error(
+          error.response?.data?.detail || "An error occurred during processing"
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -132,6 +191,103 @@ function App() {
     ? "none"
     : "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)";
 
+  // ── Login Screen ──
+  if (!authToken) {
+    return (
+      <ConfigProvider
+        theme={{
+          algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
+          token: { colorPrimary: accent, borderRadius: 8 },
+        }}
+      >
+        <div
+          style={{
+            minHeight: "100vh",
+            background: bgColor,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: cardColor,
+              padding: "48px 40px",
+              borderRadius: 16,
+              border: `1px solid ${borderColor}`,
+              boxShadow: cardShadow,
+              width: 380,
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                background: isDarkMode ? "#1a2a33" : "#EDF2F4",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 20px auto",
+              }}
+            >
+              <LockOutlined style={{ fontSize: 24, color: accent }} />
+            </div>
+            <h1
+              style={{
+                color: textColor,
+                fontSize: 22,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                margin: "0 0 6px 0",
+              }}
+            >
+              Love N Fit
+            </h1>
+            <p style={{ color: subText, fontSize: 14, margin: "0 0 28px 0" }}>
+              Enter the password to continue
+            </p>
+            <form onSubmit={handleLogin}>
+              <Input.Password
+                placeholder="Password"
+                size="large"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                style={{
+                  marginBottom: 16,
+                  borderColor,
+                  borderRadius: 10,
+                  height: 46,
+                }}
+              />
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                loading={loginLoading}
+                block
+                style={{
+                  height: 46,
+                  fontWeight: 600,
+                  borderRadius: 10,
+                  fontSize: 15,
+                  background: accent,
+                  borderColor: accent,
+                }}
+              >
+                Sign In
+              </Button>
+            </form>
+          </div>
+          <ToastContainer theme={isDarkMode ? "dark" : "light"} />
+        </div>
+      </ConfigProvider>
+    );
+  }
+
+  // ── Main App ──
   return (
     <ConfigProvider
       theme={{
@@ -169,13 +325,27 @@ function App() {
           >
             Love N Fit
           </span>
-          <Switch
-            checked={isDarkMode}
-            onChange={setIsDarkMode}
-            checkedChildren={<BulbFilled />}
-            unCheckedChildren={<BulbOutlined />}
-            style={{ backgroundColor: isDarkMode ? "#4A90A4" : undefined }}
-          />
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Switch
+              checked={isDarkMode}
+              onChange={setIsDarkMode}
+              checkedChildren={<BulbFilled />}
+              unCheckedChildren={<BulbOutlined />}
+              style={{ backgroundColor: isDarkMode ? "#4A90A4" : undefined }}
+            />
+            <Button
+              size="small"
+              onClick={handleLogout}
+              style={{
+                fontSize: 11,
+                borderRadius: 6,
+                color: subText,
+                borderColor: borderColor,
+              }}
+            >
+              Sign Out
+            </Button>
+          </div>
         </Header>
 
         <Content style={{ padding: "2rem 1.5rem" }}>
@@ -340,6 +510,7 @@ function App() {
                       <ChatWidget
                         onProductSelect={(url) => setProductUrl(url)}
                         isDarkMode={isDarkMode}
+                        api={api}
                       />
                     </div>
 

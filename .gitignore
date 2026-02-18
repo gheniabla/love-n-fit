@@ -8,9 +8,6 @@ venv/
 env/
 .env
 
-# Backend data (large FAISS index)
-backend/data/
-
 # Logs
 logs
 *.log
