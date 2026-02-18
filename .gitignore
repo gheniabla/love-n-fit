@@ -1,0 +1,33 @@
+__pycache__/
+*.pyc
+*.pyo
+build/
+*.egg-info/
+venv/
+.venv/
+env/
+.env
+
+# Backend data (large FAISS index)
+backend/data/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.sw?
+
+# Poetry
+poetry.lock
