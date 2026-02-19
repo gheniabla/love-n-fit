@@ -51,6 +51,7 @@ function App() {
   });
 
   const resultRef = useRef(null);
+  const productUrlRef = useRef(null);
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
   // Shared axios instance with auth header
@@ -181,6 +182,17 @@ function App() {
   };
 
   // Vuori-inspired palette
+  const handleProductSelect = (url) => {
+    setProductUrl(url);
+    toast.success("Product selected! Now fill in your measurements and hit Try On.", {
+      autoClose: 3000,
+    });
+    // Scroll the URL field into view
+    setTimeout(() => {
+      productUrlRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+  };
+
   const bgColor = isDarkMode ? "#0c0c0c" : "#FAFAF8";
   const cardColor = isDarkMode ? "#151515" : "#FFFFFF";
   const textColor = isDarkMode ? "#e0e0e0" : "#2D3C4C";
@@ -363,8 +375,8 @@ function App() {
               >
                 Virtual Try-On
               </h1>
-              <p style={{ color: subText, fontSize: 15, margin: 0 }}>
-                Upload your photo, find a Vuori product, and see how it looks on you
+              <p style={{ color: subText, fontSize: 14, margin: 0, lineHeight: 1.7 }}>
+                1. Upload your photo&nbsp;&nbsp;2. Find a product&nbsp;&nbsp;3. Enter measurements&nbsp;&nbsp;4. Try it on
               </p>
             </div>
 
@@ -400,8 +412,16 @@ function App() {
                         letterSpacing: "0.04em",
                         textTransform: "uppercase",
                         margin: "0 0 16px 0",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
                       }}
                     >
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        width: 22, height: 22, borderRadius: "50%", background: accent,
+                        color: "#fff", fontSize: 11, fontWeight: 700, flexShrink: 0,
+                      }}>1</span>
                       Your Photo
                     </h3>
 
@@ -428,8 +448,16 @@ function App() {
                           letterSpacing: "0.04em",
                           textTransform: "uppercase",
                           margin: "0 0 12px 0",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
                         }}
                       >
+                        <span style={{
+                          display: "inline-flex", alignItems: "center", justifyContent: "center",
+                          width: 22, height: 22, borderRadius: "50%", background: accent,
+                          color: "#fff", fontSize: 11, fontWeight: 700, flexShrink: 0,
+                        }}>3</span>
                         Measurements
                       </h3>
 
@@ -500,15 +528,23 @@ function App() {
                         letterSpacing: "0.04em",
                         textTransform: "uppercase",
                         margin: "0 0 16px 0",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
                       }}
                     >
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        width: 22, height: 22, borderRadius: "50%", background: accent,
+                        color: "#fff", fontSize: 11, fontWeight: 700, flexShrink: 0,
+                      }}>2</span>
                       Find a Product
                     </h3>
 
                     {/* Chat Widget — fixed max height with internal scroll */}
                     <div style={{ flex: 1, minHeight: 280, maxHeight: 400, overflow: "hidden" }}>
                       <ChatWidget
-                        onProductSelect={(url) => setProductUrl(url)}
+                        onProductSelect={handleProductSelect}
                         isDarkMode={isDarkMode}
                         api={api}
                       />
@@ -516,6 +552,7 @@ function App() {
 
                     {/* Product URL */}
                     <div
+                      ref={productUrlRef}
                       style={{
                         marginTop: 16,
                         paddingTop: 14,
@@ -541,7 +578,7 @@ function App() {
               </div>
 
               {/* Submit Button */}
-              <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 28, gap: 8 }}>
                 <Button
                   type="primary"
                   size="large"
@@ -549,17 +586,37 @@ function App() {
                   loading={loading}
                   style={{
                     height: 48,
-                    width: 220,
+                    width: 240,
                     fontSize: 15,
                     fontWeight: 600,
                     borderRadius: 10,
                     letterSpacing: "0.02em",
                     background: accent,
                     borderColor: accent,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
                   }}
                 >
-                  {loading ? "Generating..." : "Let me Try On"}
+                  {loading ? (
+                    "Generating... hang tight"
+                  ) : (
+                    <>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        width: 20, height: 20, borderRadius: "50%", background: "rgba(255,255,255,0.25)",
+                        fontSize: 11, fontWeight: 700,
+                      }}>4</span>
+                      Try It On
+                    </>
+                  )}
                 </Button>
+                {loading && (
+                  <Text style={{ color: subText, fontSize: 12 }}>
+                    This usually takes 20–40 seconds
+                  </Text>
+                )}
               </div>
             </form>
 

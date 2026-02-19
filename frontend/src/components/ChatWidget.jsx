@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Input, Button, Typography, Tag } from "antd";
-import { SendOutlined, HeartOutlined } from "@ant-design/icons";
+import { SendOutlined, LinkOutlined, CheckCircleOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -174,21 +174,22 @@ function ChatWidget({ onProductSelect, isDarkMode, api }) {
                       <Button
                         size="small"
                         onClick={() => window.open(product.url, "_blank")}
-                        icon={<HeartOutlined />}
+                        icon={<LinkOutlined />}
                         style={{
                           fontSize: 10.5,
                           borderRadius: 6,
-                          color: "#c0392b",
-                          borderColor: "#e8c4c0",
+                          color: isDarkMode ? "#8ab" : "#527a8a",
+                          borderColor: isDarkMode ? "#2a3a44" : "#c4d8df",
                           height: 26,
                         }}
                       >
-                        Love it!
+                        View
                       </Button>
                       <Button
                         size="small"
                         type="primary"
                         onClick={() => onProductSelect(product.url)}
+                        icon={<CheckCircleOutlined />}
                         style={{
                           fontSize: 10.5,
                           borderRadius: 6,
@@ -197,7 +198,7 @@ function ChatWidget({ onProductSelect, isDarkMode, api }) {
                           borderColor: isDarkMode ? "#2D5A6E" : "#2D3C4C",
                         }}
                       >
-                        Try it on
+                        Select
                       </Button>
                     </div>
                   </div>
@@ -243,7 +244,7 @@ function ChatWidget({ onProductSelect, isDarkMode, api }) {
           onKeyDown={handleKeyDown}
           placeholder="Ask about Vuori products..."
           disabled={loading}
-          autoSize={{ minRows: 2, maxRows: 3 }}
+          autoSize={{ minRows: 1, maxRows: 3 }}
           style={{
             borderRadius: 8,
             fontSize: 12.5,
