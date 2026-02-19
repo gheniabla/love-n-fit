@@ -193,6 +193,12 @@ function App() {
     }, 100);
   };
 
+  const vuoriUrlPattern = /^https?:\/\/(www\.)?vuoriclothing\.com\/products\/.+/;
+  const urlTrimmed = productUrl.trim();
+  const isUrlFilled = urlTrimmed.length > 0;
+  const isUrlValid = vuoriUrlPattern.test(urlTrimmed);
+  const showUrlError = isUrlFilled && !isUrlValid;
+
   const bgColor = isDarkMode ? "#0c0c0c" : "#FAFAF8";
   const cardColor = isDarkMode ? "#151515" : "#FFFFFF";
   const textColor = isDarkMode ? "#e0e0e0" : "#2D3C4C";
@@ -567,11 +573,18 @@ function App() {
                         value={productUrl}
                         onChange={(e) => setProductUrl(e.target.value)}
                         size="large"
-                        style={{ borderColor }}
+                        status={showUrlError ? "error" : undefined}
+                        style={{ borderColor: showUrlError ? "#ff4d4f" : borderColor }}
                       />
-                      <Text style={{ color: subText, fontSize: 11, marginTop: 5, display: "block" }}>
-                        Paste a link or pick a product from the chat above
-                      </Text>
+                      {showUrlError ? (
+                        <Text style={{ color: "#ff4d4f", fontSize: 11, marginTop: 5, display: "block" }}>
+                          Please enter a valid Vuori product URL (e.g. https://vuoriclothing.com/products/...)
+                        </Text>
+                      ) : (
+                        <Text style={{ color: subText, fontSize: 11, marginTop: 5, display: "block" }}>
+                          Paste a link or pick a product from the chat above
+                        </Text>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -584,6 +597,7 @@ function App() {
                   size="large"
                   htmlType="submit"
                   loading={loading}
+                  disabled={!isUrlValid && !loading}
                   style={{
                     height: 48,
                     width: 240,
@@ -591,8 +605,7 @@ function App() {
                     fontWeight: 600,
                     borderRadius: 10,
                     letterSpacing: "0.02em",
-                    background: accent,
-                    borderColor: accent,
+                    ...( (isUrlValid || loading) ? { background: accent, borderColor: accent } : {}),
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
