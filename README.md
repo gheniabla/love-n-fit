@@ -1,16 +1,16 @@
 # Love N Fit — Virtual Try-On
 
-AI-powered virtual try-on app that lets you upload a photo, find Vuori clothing products via a RAG chatbot, and see how they look on you — with personalized size recommendations.
+AI-powered virtual try-on app that lets you upload a photo (or take one directly on mobile), enter your body height and weight, find Vuori clothing products via a RAG chatbot, and see a virtual try-on of the chosen product on you — with the right size recommendation.
 
 ## Screenshots
 
 ### Upload & Chat
-Upload your photo, chat with the AI shopping assistant to find the perfect product, and enter your measurements.
+Upload your photo or take a picture directly on your phone, enter your body height and weight, and chat with the AI shopping assistant to find the perfect product.
 
 ![Upload and Chat](screenshots/image1.png)
 
 ### Try-On Result
-See yourself wearing the product with AI-generated imagery, along with product details, available sizes, and a personalized size recommendation.
+See a virtual try-on of the chosen product on you with the right size, along with product details and available sizes.
 
 ![Try-On Result](screenshots/image2.png)
 
@@ -21,9 +21,9 @@ Browse all your previous try-on results in a visual grid.
 
 ## Features
 
-- Upload a person photo + enter height/weight measurements
+- Upload a photo or take a picture directly on mobile + enter body height/weight
 - **RAG chatbot** powered by FAISS + Gemini embeddings searches 2,100+ Vuori products
-- AI-generated try-on image using Google Gemini image generation
+- AI-generated virtual try-on showing the chosen product on you in the right size
 - Personalized **size recommendation** based on body measurements
 - "Love it!" button opens the product page for easy purchasing
 - Dark/light mode, try-on history
