@@ -1,6 +1,10 @@
+import base64
+import hashlib
+import hmac
+import json
 import logging
 import os
-import uuid
+import time
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -19,12 +23,52 @@ SITE_PASSWORD = os.getenv("SITE_PASSWORD")
 if not SITE_PASSWORD:
     raise ValueError("Missing SITE_PASSWORD in .env")
 
+# Secret used to sign session tokens. Falls back to SITE_PASSWORD so no extra
+# env var is required, but set a dedicated AUTH_SECRET in production.
+AUTH_SECRET = (os.getenv("AUTH_SECRET") or SITE_PASSWORD).encode()
+
+# How long a session token stays valid (seconds).
+TOKEN_TTL = int(os.getenv("TOKEN_TTL_SECONDS", str(7 * 24 * 60 * 60)))
+
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174"
 )
 
-# In-memory session tokens
-active_tokens: set[str] = set()
+
+def _b64encode(raw: bytes) -> str:
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
+
+
+def _b64decode(data: str) -> bytes:
+    padding = "=" * (-len(data) % 4)
+    return base64.urlsafe_b64decode(data + padding)
+
+
+def create_token() -> str:
+    """Create a stateless, HMAC-signed session token with an expiry.
+
+    No server-side storage, so tokens survive restarts and work across
+    multiple workers/instances.
+    """
+    payload = _b64encode(json.dumps({"exp": int(time.time()) + TOKEN_TTL}).encode())
+    signature = _b64encode(hmac.new(AUTH_SECRET, payload.encode(), hashlib.sha256).digest())
+    return f"{payload}.{signature}"
+
+
+def is_token_valid(token: str) -> bool:
+    try:
+        payload, signature = token.split(".", 1)
+    except ValueError:
+        return False
+    expected = _b64encode(hmac.new(AUTH_SECRET, payload.encode(), hashlib.sha256).digest())
+    if not hmac.compare_digest(signature, expected):
+        return False
+    try:
+        exp = json.loads(_b64decode(payload)).get("exp", 0)
+    except ValueError:
+        return False
+    return time.time() < exp
+
 
 app = FastAPI()
 
@@ -44,11 +88,9 @@ class LoginRequest(BaseModel):
 
 @app.post("/api/login")
 async def login(req: LoginRequest):
-    if req.password != SITE_PASSWORD:
+    if not hmac.compare_digest(req.password, SITE_PASSWORD):
         raise HTTPException(status_code=401, detail="Invalid password")
-    token = str(uuid.uuid4())
-    active_tokens.add(token)
-    return {"token": token}
+    return {"token": create_token()}
 
 
 async def verify_token(request: Request):
@@ -56,7 +98,7 @@ async def verify_token(request: Request):
     if not auth.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Not authenticated")
     token = auth[7:]
-    if token not in active_tokens:
+    if not is_token_valid(token):
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
